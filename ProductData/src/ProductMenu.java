@@ -21,9 +21,6 @@ public class ProductMenu extends JFrame {
         // isi window
         menu.setContentPane(menu.mainPanel);
 
-        // ubah warna background
-        menu.getContentPane().setBackground(Color.WHITE);
-
         // tampilkan window
         menu.setVisible(true);
 
