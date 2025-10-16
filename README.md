@@ -66,6 +66,6 @@ Janji Saya Mahendra Devid Putra Anwar dengan NIM 2407792 mengerjakan Tugas Prakt
 - Maka data yang diform akan ke reset
 
 # Dokumentasi
-<img src="Dokumentasi/Tp5/Screen Recording 2025-10-17 003818.gif" width="500">
+<img src="Dokumentasi/Tp5/Screen Recording 2025-10-17 003818.gif" width="900">
 
 
