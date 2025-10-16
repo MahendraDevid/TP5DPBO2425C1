@@ -1,5 +1,5 @@
 # Janji
-Janji Saya Mahendra Devid Putra Anwar dengan NIM 2407792 mengerjakan Tugas Praktikum 2 dalam mata kuliah Desain dan Pemrograman Berorientasi Objek untuk keberkahanNya maka saya tidak melakukan kecurangan seperti yang telah dispesifikasikan. Aamiin.
+Janji Saya Mahendra Devid Putra Anwar dengan NIM 2407792 mengerjakan Tugas Praktikum 5 dalam mata kuliah Desain dan Pemrograman Berorientasi Objek untuk keberkahanNya maka saya tidak melakukan kecurangan seperti yang telah dispesifikasikan. Aamiin.
 
 # Desain Program
 1. **Class Product**
