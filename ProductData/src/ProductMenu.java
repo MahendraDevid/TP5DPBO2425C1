@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 
 public class ProductMenu extends JFrame {
@@ -32,6 +33,7 @@ public class ProductMenu extends JFrame {
     private int selectedIndex = -1;
     // list untuk menampung semua produk
     private ArrayList<Product> listProduct;
+    private Database database;
     private JPanel mainPanel;
     private JTextField idField;
     private JTextField namaField;
@@ -53,11 +55,8 @@ public class ProductMenu extends JFrame {
 
     // constructor
     public ProductMenu() {
-        // inisialisasi listProduct
-        listProduct = new ArrayList<>();
-
-        // isi listProduct
-        populateList();
+        //buat objek database
+        database = new Database();
 
         // isi tabel produk
         productTable.setModel(setTable());
@@ -152,18 +151,24 @@ public class ProductMenu extends JFrame {
         // buat objek tabel dengan kolom yang sudah dibuat
         DefaultTableModel tmp = new DefaultTableModel(null, cols);
 
-        // isi tabel dengan listProduct
-        for (int i = 0; i < listProduct.size(); i++){
-            Object[] row = {
-                    i + 1,
-                    listProduct.get(i).getId(),
-                    listProduct.get(i).getNama(),
-                    String.format("%.2f", listProduct.get(i).getHarga()),
-                    listProduct.get(i).getKategori(),
-                    listProduct.get(i).getExpired(),
-                    listProduct.get(i).getStok()
-            };
-            tmp.addRow(row);
+        //isi tabel dengan hasil query
+        try{
+            ResultSet resultSet = database.selectQuery("SELECT * FROM product");
+
+            int i = 0;
+            while (resultSet.next()) {
+                Object[] row = new Object[7];
+                row[0] = ++i;
+                row[1] = resultSet.getString("id");
+                row[2] = resultSet.getString("nama");
+                row[3] = resultSet.getDouble("harga");
+                row[4] = resultSet.getString("kategori");
+                row[5] = resultSet.getString("expired");
+                row[6] = resultSet.getInt("stok");
+                tmp.addRow(row);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return tmp; // return juga harus diganti
@@ -179,8 +184,31 @@ public class ProductMenu extends JFrame {
             String expired = expiredField.getText();
             int stok = (Integer) stokSpinner.getValue();
 
-            // tambahkan data ke dalam list
-            listProduct.add(new Product(id, nama, harga, kategori, expired, stok));
+            //cek data tidak boleh kosong
+            try{
+                if(id.isEmpty() || nama.isEmpty() || kategori.equals("Pilih Kategori Produk") || expired.isEmpty()){
+                    throw new Exception("Data tidak boleh kosong");
+                }
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            //cek id tidak boleh sama
+            try{
+                ResultSet resultSet = database.selectQuery("SELECT * FROM product WHERE id = '" + id + "'");
+                if(resultSet.next()){
+                    throw new Exception("ID Produk sudah ada");
+                }
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+
+            //tambah data produk ke database
+            String sqlQuery = "INSERT INTO product VALUES ('" + id + "', '" + nama + "', " + harga + ", '" + kategori + "', '" + expired + "', " + stok + ")";
+            database.insertUpdateDeleteQuery(sqlQuery);
 
             // update tabel
             productTable.setModel(setTable());
@@ -206,13 +234,19 @@ public class ProductMenu extends JFrame {
             String expired = expiredField.getText();
             int stok = (Integer) stokSpinner.getValue();
 
-            // ubah data produk di list
-            listProduct.get(selectedIndex).setId(id);
-            listProduct.get(selectedIndex).setNama(nama);
-            listProduct.get(selectedIndex).setHarga(harga);
-            listProduct.get(selectedIndex).setKategori(kategori);
-            listProduct.get(selectedIndex).setExpired(expired);
-            listProduct.get(selectedIndex).setStok(stok);
+            //cek data tidak boleh kosong
+            try{
+                if(id.isEmpty() || nama.isEmpty() || kategori.equals("Pilih Kategori Produk") || expired.isEmpty()){
+                    throw new Exception("Data tidak boleh kosong");
+                }
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // update data di database
+            String sqlQuery = "UPDATE product SET " + "nama = '" + nama + "', " + "harga = " + harga + ", " + "kategori = '" + kategori + "', " + "expired = '" + expired + "', " + "stok = " + stok + " " + "WHERE id = '" + id + "'";
+            database.insertUpdateDeleteQuery(sqlQuery);
 
             // update tabel
             productTable.setModel(setTable());
@@ -231,8 +265,9 @@ public class ProductMenu extends JFrame {
     }
 
     public void deleteData() {
-        // hapus data dari list
-        listProduct.remove(selectedIndex);
+        // hapus data dari database
+        String sqlQuery = "DELETE FROM product WHERE id = '" + idField.getText() + "'";
+        database.insertUpdateDeleteQuery(sqlQuery);
 
         // update tabel
         productTable.setModel(setTable());
@@ -263,14 +298,5 @@ public class ProductMenu extends JFrame {
         // ubah selectedIndex menjadi -1 (tidak ada baris yang dipilih)
         selectedIndex = -1;
 
-    }
-
-    // panggil prosedur ini untuk mengisi list produk
-    private void populateList() {
-        listProduct.add(new Product("P001", "Indomie Goreng", 2500, "Makanan", "2024-12-31", 100));
-        listProduct.add(new Product("P002", "Teh Botol Sosro", 5000, "Minuman", "2024-11-30", 50));
-        listProduct.add(new Product("P003", "Chitato", 7000, "Makanan", "2024-10-15", 75));
-        listProduct.add(new Product("P004", "Aqua", 3000, "Minuman", "2025-01-20", 200));
-        listProduct.add(new Product("P005", "Silver Queen", 15000, "Makanan", "2024-09-10", 30));
     }
 }
